@@ -1,0 +1,13 @@
+singularity run --cleanenv \
+-H /scratch/a/arisvoin/nakuah/sing_container \
+-B /scratch/a/arisvoin/nakuah/POND/Structural_Rerun_Stringent/CorticalThickness_EB_Age:/dir \
+-B /scratch/a/arisvoin/desmith/pond/pipelines/fmriprep/out/ciftify:/subfiles \
+/scratch/a/arisvoin/mjoseph/containers/PALM/andersonwinkler_palm_alpha115-2019-07-02-fc29916398cd.simg \
+-i /dir/allsubs_merged_L.func.gii  \
+-d /dir/DesignMatrix.csv \
+-t /dir/ContrastMatrix.csv \
+-o /dir/results_R_cort \
+-T -tfce2D \
+-s /subfiles/sub-0880002/MNINonLinear/fsaverage_LR32k/sub-0880002.R.midthickness.32k_fs_LR.surf.gii /dir/L_area.func.gii \
+-logp -n 2000 \
+-precision "double"
