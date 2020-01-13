@@ -1,0 +1,386 @@
+###This script will create the necessary csvs of the DTI metrics for the cortico-amygdalar project 
+
+
+#Step 0: loading packages
+library(dplyr)
+library(tidyverse)
+library(data.table)
+library(plyr)
+library(stringr)
+
+#Step 1: importing all the txt files from the Slicer output folder
+
+folder <- "/projects/hnakua/Slicer/ExtractingFA_MD3"  
+setwd(folder)
+
+ClinicalData <- read.csv("/projects/hnakua/POND/All_ClinicalData_POND.csv")
+
+###################################    LEFT CINGULUM    ########################################
+
+files_LeftCingulum <-
+  Sys.glob("*Cingulum_Clean_LH_measurements.csv") %>% 
+  str_sub(1, 11) %>%
+  map_df(~read_csv(.)) 
+
+
+#list_of_files <- list.files(pattern = "*Cingulum_LH_measurements.csv", 
+                            #full.names = TRUE)
+
+#files_LeftCingulum <- list_of_files %>%
+ # set_names(.) %>%
+  #map_df(~read_csv(.), .id = "FileName")
+
+left_cingulum <-
+  Sys.glob("*Cingulum_Clean_LH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+left_cingulum %>% drop_na(Clean_Cingulum_Bundle)
+
+
+#now cleaning the Left Cingulum DF
+
+#removing the columns that are not needed
+
+left_cingulum <- left_cingulum[, -c(11:78)]
+
+#changing the names of the columns
+
+names(left_cingulum)[names(left_cingulum) == "Clean_Cingulum_Bundle_2"] <- "Mean_Length"
+names(left_cingulum)[names(left_cingulum) == "Clean_Cingulum_Bundle_3"] <- "Mean_FA"
+names(left_cingulum)[names(left_cingulum) == "Clean_Cingulum_Bundle_4"] <- "Mean_LinearMeasure"
+names(left_cingulum)[names(left_cingulum) == "Clean_Cingulum_Bundle_5"] <- "Mean_MaxEigenvalue"
+names(left_cingulum)[names(left_cingulum) == "Clean_Cingulum_Bundle_6"] <- "Mean_MD"
+names(left_cingulum)[names(left_cingulum) == "Clean_Cingulum_Bundle_7"] <- "Mean_MidEigenvalue"
+names(left_cingulum)[names(left_cingulum) == "Clean_Cingulum_Bundle_8"] <- "Mean_MinEigenvalue"
+names(left_cingulum)[names(left_cingulum) == "Clean_Cingulum_Bundle_9"] <- "Mean_PlanarMeasure"
+names(left_cingulum)[names(left_cingulum) == "source"] <- "ID"
+
+
+##converting the values to numeric (standard was character)
+
+left_cingulum$Mean_FA <- as.numeric(as.character(left_cingulum$Mean_FA))
+left_cingulum$Mean_MD <- as.numeric(as.character(left_cingulum$Mean_MD))
+
+#removing the duplicates 
+
+read_csv(left_cingulum, na = c("Num_Fibers", "NA"), c("Mean_Length", "NA"), c("tensors.FractionalAnisotropy.Mean", "NA"),
+         c("tensors.LinearMeasure.Mean", "NA"), c("tensors.MaxEigenvalue.Mean", "NA"), c("tensors.MeanDiffusivity.Mean", "NA"), 
+         c("tensors.MidEigenvalue.Mean", "NA"), c("tensors.MinEigenvalue.Mean", "NA"), c("tensors.PlanarMeasure.Mean", "NA"))
+
+
+left_cingulum <- left_cingulum[!(rowSums(is.na(left_cingulum))),]
+left_cingulum <- merge(left_cingulum, ClinicalData, by = "ID")
+
+LC <- write.csv(left_cingulum, "/media/hnakua/6998-DB90/DiffusionAnalysis/left_cingulum.csv")
+
+
+
+
+###################################    RIGHT CINGULUM    ########################################
+
+
+right_cingulum <-
+  Sys.glob("*Cingulum_Clean_RH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+#removing the columns that are not needed
+
+right_cingulum <- right_cingulum[, -c(11:78)]
+
+#changing the names of the columns
+
+names(right_cingulum)[names(right_cingulum) == "Clean_Cingulum_Bundle_2"] <- "Mean_Length"
+names(right_cingulum)[names(right_cingulum) == "Clean_Cingulum_Bundle_3"] <- "Mean_FA"
+names(right_cingulum)[names(right_cingulum) == "Clean_Cingulum_Bundle_4"] <- "Mean_LinearMeasure"
+names(right_cingulum)[names(right_cingulum) == "Clean_Cingulum_Bundle_5"] <- "Mean_MaxEigenvalue"
+names(right_cingulum)[names(right_cingulum) == "Clean_Cingulum_Bundle_6"] <- "Mean_MD"
+names(right_cingulum)[names(right_cingulum) == "Clean_Cingulum_Bundle_7"] <- "Mean_MidEigenvalue"
+names(right_cingulum)[names(right_cingulum) == "Clean_Cingulum_Bundle_8"] <- "Mean_MinEigenvalue"
+names(right_cingulum)[names(right_cingulum) == "Clean_Cingulum_Bundle_9"] <- "Mean_PlanarMeasure"
+names(right_cingulum)[names(right_cingulum) == "source"] <- "ID"
+
+right_cingulum$Mean_FA <- as.numeric(as.character(right_cingulum$Mean_FA))
+right_cingulum$Mean_MD <- as.numeric(as.character(right_cingulum$Mean_MD))
+
+
+right_cingulum <- right_cingulum[!(rowSums(is.na(right_cingulum))),]
+
+right_cingulum <- merge(right_cingulum, ClinicalData, by = "ID")
+
+LC <- write.csv(right_cingulum, "/media/hnakua/6998-DB90/DiffusionAnalysis/right_cingulum.csv")
+
+
+###################################    Right TOTAL UNCINATE FASCICULUS    ########################################
+
+
+right_UF <-
+  Sys.glob("*FULL_UF_RH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+right_UF <- right_UF[, -c(11:65)]
+
+
+names(right_UF)[names(right_UF) == "Full_UF_2"] <- "Mean_Length"
+names(right_UF)[names(right_UF) == "Full_UF_3"] <- "Mean_FA"
+names(right_UF)[names(right_UF) == "Full_UF_4"] <- "Mean_LinearMeasure"
+names(right_UF)[names(right_UF) == "Full_UF_5"] <- "Mean_MaxEigenvalue"
+names(right_UF)[names(right_UF) == "Full_UF_6"] <- "Mean_MD"
+names(right_UF)[names(right_UF) == "Full_UF_7"] <- "Mean_MidEigenvalue"
+names(right_UF)[names(right_UF) == "Full_UF_8"] <- "Mean_MinEigenvalue"
+names(right_UF)[names(right_UF) == "Full_UF_9"] <- "Mean_PlanarMeasure"
+names(right_UF)[names(right_UF) == "source"] <- "ID"
+
+
+right_UF <- right_UF[!(rowSums(is.na(right_UF))),]
+
+right_UF$Mean_FA <- as.numeric(as.character(right_UF$Mean_FA))
+right_UF$Mean_MD <- as.numeric(as.character(right_UF$Mean_MD))
+
+right_UF <- merge(right_UF, ClinicalData, by = "ID")
+
+###remove the 4 people with prisma scans 
+right_UF$ID[right_UF$ID == "sub-0880409"] <- NA
+right_UF$ID[right_UF$ID == "sub-0880696"] <- NA
+right_UF$ID[right_UF$ID == "sub-1050528"] <- NA
+right_UF$ID[right_UF$ID == "sub-1050509"] <- NA
+
+RUF <- write.csv(right_UF, "/media/hnakua/6998-DB90/DiffusionAnalysis/right_UF_Total.csv")
+
+
+right_UF <- read.csv("/media/hnakua/6998-DB90/DiffusionAnalysis/right_UF_Total.csv")
+
+
+###################################    LEFT TOTAL UNCINATE FASCICULUS    ########################################
+
+
+left_UF <-
+  Sys.glob("*FULL_UF_LH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+left_UF <- left_UF[, -c(11:65)]
+
+
+names(left_UF)[names(left_UF) == "Full_UF_2"] <- "Mean_Length"
+names(left_UF)[names(left_UF) == "Full_UF_3"] <- "Mean_FA"
+names(left_UF)[names(left_UF) == "Full_UF_4"] <- "Mean_LinearMeasure"
+names(left_UF)[names(left_UF) == "Full_UF_5"] <- "Mean_MaxEigenvalue"
+names(left_UF)[names(left_UF) == "Full_UF_6"] <- "Mean_MD"
+names(left_UF)[names(left_UF) == "Full_UF_7"] <- "Mean_MidEigenvalue"
+names(left_UF)[names(left_UF) == "Full_UF_8"] <- "Mean_MinEigenvalue"
+names(left_UF)[names(left_UF) == "Full_UF_9"] <- "Mean_PlanarMeasure"
+names(left_UF)[names(left_UF) == "source"] <- "ID"
+
+
+left_UF <- left_UF[!(rowSums(is.na(left_UF))),]
+
+left_UF$Mean_FA <- as.numeric(as.character(left_UF$Mean_FA))
+left_UF$Mean_MD <- as.numeric(as.character(left_UF$Mean_MD))
+
+left_UF <- merge(left_UF, ClinicalData, by = "ID")
+
+
+LUF <- write.csv(left_UF, "/media/hnakua/6998-DB90/DiffusionAnalysis/left_UF_Total.csv")
+
+
+
+###################################    LEFT LATERAL UNCINATE FASCICULUS    ########################################
+
+
+left_Lateral_UF <-
+  Sys.glob("*Lateral_UncFas_LH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+left_Lateral_UF <- left_Lateral_UF[, -c(11:65)]
+
+
+names(left_Lateral_UF)[names(left_Lateral_UF) == "Lateral_UF_2"] <- "Mean_Length"
+names(left_Lateral_UF)[names(left_Lateral_UF) == "Lateral_UF_3"] <- "Mean_FA"
+names(left_Lateral_UF)[names(left_Lateral_UF) == "Lateral_UF_4"] <- "Mean_LinearMeasure"
+names(left_Lateral_UF)[names(left_Lateral_UF) == "Lateral_UF_5"] <- "Mean_MaxEigenvalue"
+names(left_Lateral_UF)[names(left_Lateral_UF) == "Lateral_UF_6"] <- "Mean_MD"
+names(left_Lateral_UF)[names(left_Lateral_UF) == "Lateral_UF_7"] <- "Mean_MidEigenvalue"
+names(left_Lateral_UF)[names(left_Lateral_UF) == "Lateral_UF_8"] <- "Mean_MinEigenvalue"
+names(left_Lateral_UF)[names(left_Lateral_UF) == "Lateral_UF_9"] <- "Mean_PlanarMeasure"
+names(left_Lateral_UF)[names(left_Lateral_UF) == "source"] <- "ID"
+
+left_Lateral_UF[left_Lateral_UF$Lateral_UF_1] <- NULL
+
+left_Lateral_UF <- left_Lateral_UF[!(rowSums(is.na(left_Lateral_UF))),]
+
+left_Lateral_UF$Mean_FA <- as.numeric(as.character(left_Lateral_UF$Mean_FA))
+left_Lateral_UF$Mean_MD <- as.numeric(as.character(left_Lateral_UF$Mean_MD))
+
+left_Lateral_UF <- merge(left_Lateral_UF, ClinicalData, by = "ID")
+
+Lateral_LUF <- write.csv(left_Lateral_UF, "/media/hnakua/6998-DB90/DiffusionAnalysis/left_Lateral_UF.csv")
+
+
+
+###################################    LEFT ANTERIOR UNCINATE FASCICULUS    ########################################
+
+
+left_Anterior_UF <-
+  Sys.glob("*Anterior_UncFas_LH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+left_Anterior_UF <- left_Anterior_UF[, -c(11:26)]
+
+
+names(left_Anterior_UF)[names(left_Anterior_UF) == "Anterior_UF_2"] <- "Mean_Length"
+names(left_Anterior_UF)[names(left_Anterior_UF) == "Anterior_UF_3"] <- "Mean_FA"
+names(left_Anterior_UF)[names(left_Anterior_UF) == "Anterior_UF_4"] <- "Mean_LinearMeasure"
+names(left_Anterior_UF)[names(left_Anterior_UF) == "Anterior_UF_5"] <- "Mean_MaxEigenvalue"
+names(left_Anterior_UF)[names(left_Anterior_UF) == "Anterior_UF_6"] <- "Mean_MD"
+names(left_Anterior_UF)[names(left_Anterior_UF) == "Anterior_UF_7"] <- "Mean_MidEigenvalue"
+names(left_Anterior_UF)[names(left_Anterior_UF) == "Anterior_UF_8"] <- "Mean_MinEigenvalue"
+names(left_Anterior_UF)[names(left_Anterior_UF) == "Anterior_UF_9"] <- "Mean_PlanarMeasure"
+names(left_Anterior_UF)[names(left_Anterior_UF) == "source"] <- "ID"
+
+
+left_Anterior_UF <- left_Anterior_UF[!(rowSums(is.na(left_Anterior_UF))),]
+
+left_Anterior_UF$Mean_FA <- as.numeric(as.character(left_Anterior_UF$Mean_FA))
+left_Anterior_UF$Mean_MD <- as.numeric(as.character(left_Anterior_UF$Mean_MD))
+
+left_Anterior_UF <- merge(left_Anterior_UF, ClinicalData, by = "ID")
+
+Anterior_LUF <- write.csv(left_Anterior_UF, "/media/hnakua/6998-DB90/DiffusionAnalysis/left_Anterior_UF.csv")
+
+
+
+###################################    RIGHT LATERAL UNCINATE FASCICULUS    ########################################
+
+
+right_Lateral_UF <-
+  Sys.glob("*Lateral_UncFas_RH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+right_Lateral_UF <- right_Lateral_UF[, -c(11:65)]
+
+
+names(right_Lateral_UF)[names(right_Lateral_UF) == "Lateral_UF_2"] <- "Mean_Length"
+names(right_Lateral_UF)[names(right_Lateral_UF) == "Lateral_UF_3"] <- "Mean_FA"
+names(right_Lateral_UF)[names(right_Lateral_UF) == "Lateral_UF_4"] <- "Mean_LinearMeasure"
+names(right_Lateral_UF)[names(right_Lateral_UF) == "Lateral_UF_5"] <- "Mean_MaxEigenvalue"
+names(right_Lateral_UF)[names(right_Lateral_UF) == "Lateral_UF_6"] <- "Mean_MD"
+names(right_Lateral_UF)[names(right_Lateral_UF) == "Lateral_UF_7"] <- "Mean_MidEigenvalue"
+names(right_Lateral_UF)[names(right_Lateral_UF) == "Lateral_UF_8"] <- "Mean_MinEigenvalue"
+names(right_Lateral_UF)[names(right_Lateral_UF) == "Lateral_UF_9"] <- "Mean_PlanarMeasure"
+names(right_Lateral_UF)[names(right_Lateral_UF) == "source"] <- "ID"
+
+right_Lateral_UF <- right_Lateral_UF[!(rowSums(is.na(right_Lateral_UF))),]
+
+right_Lateral_UF$Mean_FA <- as.numeric(as.character(right_Lateral_UF$Mean_FA))
+right_Lateral_UF$Mean_MD <- as.numeric(as.character(right_Lateral_UF$Mean_MD))
+
+right_Lateral_UF <- merge(right_Lateral_UF, ClinicalData, by = "ID")
+
+Lateral_RUF <- write.csv(right_Lateral_UF, "/media/hnakua/6998-DB90/DiffusionAnalysis/right_Lateral_UF.csv")
+
+
+
+###################################    RIGHT ANTERIOR UNCINATE FASCICULUS    ########################################
+
+
+right_Anterior_UF <-
+  Sys.glob("*Anterior_UncFas_RH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+right_Anterior_UF <- right_Anterior_UF[, -c(11:26)]
+
+
+names(right_Anterior_UF)[names(right_Anterior_UF) == "Anterior_UF_2"] <- "Mean_Length"
+names(right_Anterior_UF)[names(right_Anterior_UF) == "Anterior_UF_3"] <- "Mean_FA"
+names(right_Anterior_UF)[names(right_Anterior_UF) == "Anterior_UF_4"] <- "Mean_LinearMeasure"
+names(right_Anterior_UF)[names(right_Anterior_UF) == "Anterior_UF_5"] <- "Mean_MaxEigenvalue"
+names(right_Anterior_UF)[names(right_Anterior_UF) == "Anterior_UF_6"] <- "Mean_MD"
+names(right_Anterior_UF)[names(right_Anterior_UF) == "Anterior_UF_7"] <- "Mean_MidEigenvalue"
+names(right_Anterior_UF)[names(right_Anterior_UF) == "Anterior_UF_8"] <- "Mean_MinEigenvalue"
+names(right_Anterior_UF)[names(right_Anterior_UF) == "Anterior_UF_9"] <- "Mean_PlanarMeasure"
+names(right_Anterior_UF)[names(right_Anterior_UF) == "source"] <- "ID"
+
+right_Anterior_UF <- right_Anterior_UF[!(rowSums(is.na(right_Anterior_UF))),]
+
+right_Anterior_UF$Mean_FA <- as.numeric(as.character(right_Anterior_UF$Mean_FA))
+right_Anterior_UF$Mean_MD <- as.numeric(as.character(right_Anterior_UF$Mean_MD))
+
+right_Anterior_UF <- merge(right_Anterior_UF, ClinicalData, by = "ID")
+
+Lateral_RUF <- write.csv(right_Anterior_UF, "/media/hnakua/6998-DB90/DiffusionAnalysis/right_Anterior_UF.csv")
+
+
+
+
+###################################    RIGHT COMPLETE UNCINATE FASCICULUS    ########################################
+
+
+right_Complete_UncFas <-
+  Sys.glob("*Uncinate_Fasciculus_RH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+right_Complete_UncFas <- right_Complete_UncFas[, -c(11:130)]
+
+
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "Uncinate_Fasciculus_2"] <- "Mean_Length"
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "Uncinate_Fasciculus_3"] <- "Mean_FA"
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "Uncinate_Fasciculus_4"] <- "Mean_LinearMeasure"
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "Uncinate_Fasciculus_5"] <- "Mean_MaxEigenvalue"
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "Uncinate_Fasciculus_6"] <- "Mean_MD"
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "Uncinate_Fasciculus_7"] <- "Mean_MidEigenvalue"
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "Uncinate_Fasciculus_8"] <- "Mean_MinEigenvalue"
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "Uncinate_Fasciculus_9"] <- "Mean_PlanarMeasure"
+names(right_Complete_UncFas)[names(right_Complete_UncFas) == "source"] <- "ID"
+
+right_Complete_UncFas <- right_Complete_UncFas[!(rowSums(is.na(right_Complete_UncFas))),]
+
+right_Complete_UncFas$Mean_FA <- as.numeric(as.character(right_Complete_UncFas$Mean_FA))
+right_Complete_UncFas$Mean_MD <- as.numeric(as.character(right_Complete_UncFas$Mean_MD))
+
+right_Complete_UncFas <- merge(right_Complete_UncFas, ClinicalData, by = "ID")
+
+right_Complete_UncFas <- right_Complete_UncFas[-c(61, 91, 211, 212), ]
+
+Lateral_RUF <- write.csv(right_Complete_UncFas, "/media/hnakua/6998-DB90/DiffusionAnalysis/right_Complete_UncFas.csv")
+
+right_Complete_UncFas <- read.csv("/media/hnakua/6998-DB90/DiffusionAnalysis/right_Complete_UncFas.csv")
+
+
+
+###################################    LEFT COMPLETE UNCINATE FASCICULUS    ########################################
+
+
+left_Complete_UncFas <-
+  Sys.glob("*Uncinate_Fasciculus_LH_measurements.csv") %>%
+  map_df(function(x) read_csv(x, na = c("Num_Points", "NA")) %>% mutate(source = basename(x) %>% str_sub(1, 11)))
+
+
+left_Complete_UncFas <- left_Complete_UncFas[, -c(11:130)]
+
+
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "Uncinate_Fasciculus_2"] <- "Mean_Length"
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "Uncinate_Fasciculus_3"] <- "Mean_FA"
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "Uncinate_Fasciculus_4"] <- "Mean_LinearMeasure"
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "Uncinate_Fasciculus_5"] <- "Mean_MaxEigenvalue"
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "Uncinate_Fasciculus_6"] <- "Mean_MD"
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "Uncinate_Fasciculus_7"] <- "Mean_MidEigenvalue"
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "Uncinate_Fasciculus_8"] <- "Mean_MinEigenvalue"
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "Uncinate_Fasciculus_9"] <- "Mean_PlanarMeasure"
+names(left_Complete_UncFas)[names(left_Complete_UncFas) == "source"] <- "ID"
+
+left_Complete_UncFas <- left_Complete_UncFas[!(rowSums(is.na(left_Complete_UncFas))),]
+
+left_Complete_UncFas$Mean_FA <- as.numeric(as.character(left_Complete_UncFas$Mean_FA))
+left_Complete_UncFas$Mean_MD <- as.numeric(as.character(left_Complete_UncFas$Mean_MD))
+
+left_Complete_UncFas <- merge(left_Complete_UncFas, ClinicalData, by = "ID")
+
+Lateral_RUF <- write.csv(left_Complete_UncFas, "/media/hnakua/6998-DB90/DiffusionAnalysis/left_Complete_UncFas.csv")
+
