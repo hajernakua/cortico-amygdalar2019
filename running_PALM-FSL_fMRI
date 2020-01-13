@@ -1,0 +1,90 @@
+#!/bin/bash
+
+#partition=debug
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=40
+#SBATCH --distribution=block:block
+
+
+#This script will run Threshold Free Cluster Enhancement (TFCE) via PALM FSL on seed based functional connectivity data
+
+#Step 1: load necessary modules
+
+#module load mcr/R2018a
+#module load palm/alpha102
+#module load connectome-workbench
+#module load freesurfer/6.0.0
+
+
+#Step 2: Setting main variables/paths
+dir=/scratch/a/arisvoin/nakuah/POND/func.conn.analysis/Rerunning_MainCohort/IntBeh/wEB
+sublist=/scratch/a/arisvoin/nakuah/POND/func.conn.analysis/Rerunning_MainCohort/ExtBeh_Diagnosis/subs_fmri_diag.csv
+SUBJECT_FILES=/scratch/a/arisvoin/desmith/pond/pipelines/fmriprep/out/ciftify
+input_files=/scratch/a/arisvoin/nakuah/POND/func.conn.analysis/bold.dtseries.output/mean.time.series.output
+infile=allsubs_merged.dscalar.nii
+fname=allsubs_merged
+
+subjects=`cat $sublist`
+
+
+#Step 3: Cortical Thickness GIFTI files
+
+exampleSubid=$(head -n 1 ${sublist})
+L_CT=${SUBJECT_FILES}/${exampleSubid}/MNINonLinear/fsaverage_LR32k/*L.midthickness.32k_fs_LR.surf.gii
+R_CT=${SUBJECT_FILES}/${exampleSubid}/MNINonLinear/fsaverage_LR32k/*R.midthickness.32k_fs_LR.surf.gii
+
+
+#Step 4.a: Merge CIFTI files (This step performs a while loop by reading the text file with a while loop and going through cifti files).
+args=""
+while read subjects
+do
+    args="${args} -cifti ${input_files}/${subjects}.LA.dscalar.nii"
+done < ${sublist}
+echo $args
+
+
+
+#Step 5a: this merges the cifti files and is what PALM uses
+wb_command -cifti-merge ${infile} ${args}
+
+#Step 5b: Converts the CIFTI files to GIFTI files
+wb_command -cifti-separate ${infile} COLUMN -metric CORTEX_LEFT ${fname}_L.func.gii -metric CORTEX_RIGHT ${fname}_R.func.gii
+wb_command -gifti-convert BASE64_BINARY ${fname}_L.func.gii ${fname}_L.func.gii
+wb_command -gifti-convert BASE64_BINARY ${fname}_R.func.gii ${fname}_R.func.gii
+
+
+
+#Step 6: Creating a va.shape.gii file
+#Only need to create once, so this is hashtagged out since these have been created
+for sub in $subjects
+  do
+wb_command -surface-vertex-areas ${SUBJECT_FILES}/${sub}/MNINonLinear/fsaverage_LR32k/${sub}.L.midthickness.32k_fs_LR.surf.gii \
+${dir}/tmp/${sub}_L_midthick_va.shape.gii
+
+wb_command -surface-vertex-areas ${SUBJECT_FILES}/${sub}/MNINonLinear/fsaverage_LR32k/${sub}.R.midthickness.32k_fs_LR.surf.gii \
+${dir}/tmp/${sub}_R_midthick_va.shape.gii
+
+done
+
+
+
+#Step 7.1.a: Calculate mean surface - Left hemisphere
+MERGELIST=""
+while read subjects; do
+  MERGELIST="${MERGELIST} -metric ${dir}/tmp/${subjects}_L_midthick_va.shape.gii";
+done < ${sublist}
+
+
+#Step 7.1.b: Creating a func file from the shape file. wb_command will automatically save results in the current dir, which is output_dir
+wb_command -metric-merge L_midthick_va.func.gii ${MERGELIST}
+wb_command -metric-reduce L_midthick_va.func.gii MEAN L_area.func.gii
+
+#Step 7.2.a: Calculate mean surface - Right hemisphere
+MERGELIST=""
+while read subjects; do
+  MERGELIST="${MERGELIST} -metric $dir/tmp/${subjects}_R_midthick_va.shape.gii";
+done < ${sublist}
+
+#Step 7.2.b: Creating a func file from the shape file. wb_command will automatically save results in the current dir, which is output_dir
+wb_command -metric-merge R_midthick_va.func.gii ${MERGELIST}
+wb_command -metric-reduce R_midthick_va.func.gii MEAN R_area.func.gii
