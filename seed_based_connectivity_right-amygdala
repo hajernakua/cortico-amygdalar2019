@@ -1,0 +1,49 @@
+#!/bin/bash
+#partition=debug
+#SBATCH --nodes=1
+#SBATCH --array=1-200
+#SBATCH --cpus-per-task=40
+#SBATCH --distribution=block:block
+
+#Step 1: Create a corrected functional image file from the raw data file 
+
+#1.1 - inputs paths/files
+subject=/scratch/a/arisvoin/nakuah/POND/func.conn.analysis/Rerunning_MainCohort/subs_fmri.csv
+func_base="ses-01_task-rest_bold"
+input=/scratch/a/arisvoin/nakuah/POND/func.conn.analysis/bold.dtseries.output/ciftify_clean_img
+outdir=/scratch/a/arisvoin/nakuah/POND/func.conn.analysis/bold.dtseries.output/RA.mean.time.series
+seed=/scratch/a/arisvoin/desmith/pond/pipelines/fmriprep/out/ciftify
+sing_home=/scratch/a/arisvoin/nakuah/POND
+ciftify_container=/scratch/a/arisvoin/mjoseph/containers/FMRIPREP_CIFTIFY/tigrlab_fmriprep_ciftify_1.3.2-2.3.2-2019-06-07-ba20178606c2.simg
+
+
+#results in slurm calling each subject individually for each part of the analysis
+index() {
+   head -n $SLURM_ARRAY_TASK_ID $subject \
+   | tail -n 1
+}
+
+module load singularity
+
+#2.2 - cortico-right amygdala functional connectivity 
+
+ciftify_seed_corr() {
+      singularity exec \
+      -H ${sing_home} \
+      -B ${input}:/input \
+      -B ${outdir}:/output \
+      -B ${seed}:/seed_file \
+      ${ciftify_container} ciftify_seed_corr \
+--outputname /output/`index`.RA.dscalar.nii \
+--fisher-z \
+--roi-label 54 \
+/input/`index`/`index`_${func_base}_clean_bold.dtseries.nii \
+/seed_file/`index`/MNINonLinear/ROIs/ROIs.2.nii.gz
+}
+
+
+if [[ -e "/${input}/`index`/`index`_${func_base}_clean_bold.dtseries.nii" ]]; then
+echo "completed ciftify seed correlation for," `index`
+ciftify_seed_corr
+
+fi
