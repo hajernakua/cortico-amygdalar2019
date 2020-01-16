@@ -8,7 +8,7 @@ module load slicer/0,nightly SGE-extras/1.0
 
 
 #Step 2: specify the variables for a single subject 
-subjects=/projects/hnakua/DWI_QC_Protocol/AllPassed_DWI.csv
+subjects=/path/to/csv
 
 sub="`cat ${subjects}`"
 
@@ -18,8 +18,16 @@ heirarchy_file=${2}          #txt file with the heirarchies created
 output_dir=${3}              #path to specified output directory
 
 
-#left hemisphere 
-extract1() {
+#Step 3: Getting the assigned Node number which is associated with the heirarchy
+name_of_heirarchy=${4}   #this is the name of the heirarchy which should match the name on Slicer 
+
+grep -i \
+${4} /projects/hnakua/Slicer/Registration_Output/clustered_atlas/iteration_00002/initial_clusters/clustered_tracts_display_100_percent.modified.mrml | cut -d ' ' -f 3
+
+#Step 4: Extracting the left and right hemisphere of each tract (the cingulum and uncinate fasciculus)
+
+#4.a: extracting left hemisphere 
+extract_LH() {
 /opt/quarantine/slicer/nightly/build/lib/Slicer-4.9/cli-modules/FiberTractMeasurements \
        --outputfile ${output_dir}/${sub}.txt \  #can specify the name of the text file here
        --inputdirectory \ #path to input directory where the applied atlas clusters are located
@@ -29,8 +37,8 @@ extract1() {
 }
 
 
-#right hemisphere 
-extract2() {
+#4.b: extracting right hemisphere 
+extract_RH() {
 /opt/quarantine/slicer/nightly/build/lib/Slicer-4.9/cli-modules/FiberTractMeasurements \
        --outputfile ${output_dir}/${sub}.txt \
        --inputdirectory \
@@ -40,22 +48,15 @@ extract2() {
 }
 
 
-##still need to do all of cingulum + full_UF
-
-
+#running the actual functions
 while read sub; do
 echo "$sub"
-extract1
+extract_LH
 echo "done"
 done
 
 while read sub; do
 echo "$sub"
-extract2
+extract_LH
 echo "done"
 done 
-
-
-###this is to find the node identifying number to then run Slicer on 
-grep -i \
-Full_UF /projects/hnakua/Slicer/Registration_Output/clustered_atlas/iteration_00002/initial_clusters/clustered_tracts_display_100_percent.modified.mrml | cut -d ' ' -f 3
