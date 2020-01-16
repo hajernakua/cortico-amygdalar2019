@@ -1,19 +1,15 @@
 ###This will perform the linear regression analysis for of the diffusion metrics for the cingulum and uncinate fasciculus
 
 
-#sourcing necessary scripts
+#Step 0: sourcing necessary scripts
 source(gettingDFs.R)
 
 
-#putting together the overall noise DF which uses an algorithm to calculate the overall noise of each participant 
-Noise <- read.csv("/projects/hnakua/POND/DTI_Analysis /Noise.csv")
-Noise_Subs <- read.csv("/projects/hnakua/POND/DTI_Analysis /Noise_subs.csv")
-Noise_Subs$ID <- sub("_resSH_masked.nii.gz", "", Noise_Subs[,1]) 
-Overall_Noise <- cbind(Noise, Noise_Subs)
+#Step 1: putting together the overall noise DF which uses an algorithm to calculate the overall noise of each participant 
+Overall_Noise <- read.csv("/path/to/csv")
 
-#getting scanner and medication covariates
-
-#1. scanner
+#Step 2: getting scanner and medication covariates
+#2.a: scanner
 Scanner <- read.csv("/home/hnakua/Downloads/2019-11-28_inventory-for-grace.csv")
 names(Scanner)[names(Scanner) == "bids"] <- "ID"
 Scanner$ID <- gsub('/ses-01', '', Scanner$ID)
@@ -24,13 +20,10 @@ Scanner$ID <- gsub('/ses-05', '', Scanner$ID)
 Scanner$ID <- gsub('/ses-06', '', Scanner$ID)
 Scanner <- Scanner[!duplicated(Scanner$ID), ]
 
-#2. medication
-POND_ClinicalData <- read.csv("/projects/hnakua/POND/Clinical_Stuff/POND_06JUN2018_pp.csv")
-names(POND_ClinicalData)[names(POND_ClinicalData) == "SUBJECT"] <- "ID"
-POND_ClinicalData$ID <- ifelse(grepl("^88",POND_ClinicalData$ID), paste("sub-0", POND_ClinicalData$ID, sep=""), paste("sub-", POND_ClinicalData$ID, sep=""))
+#2.b: medication
+POND_ClinicalData <- read.csv("/path/to/csv")
 
-#merging noise and scanner DF with the diffusion metric DF
-
+#Step 3: merging noise and scanner DF with the diffusion metric DF
 right_UF <- merge(right_UF, Overall_Noise, by = "ID")
 right_UF<- merge(right_UF, Scanner, by = "ID")
 right_UF <- merge(right_UF, POND_ClinicalData[, c('ST_MED_6M', 'ID')], by = "ID")
@@ -73,6 +66,7 @@ right_UF_FA_ExtBeh <- function(right_UF){
   ols_plot_cooksd_bar(LinModel)
 }
 
+#adding internalizing behaviour as a covariate
 right_UF_FA_ExtBeh2 <- function(right_UF){
   library(car)
   library(olsrr)
@@ -132,6 +126,7 @@ right_UF_MD_ExtBeh <- function(right_UF){
 }
 
 
+#adding internalizing behaviour as a covariate
 right_UF_MD_ExtBeh2 <- function(right_UF){
   library(car)
   library(olsrr)
@@ -150,8 +145,7 @@ right_UF_MD_ExtBeh2 <- function(right_UF){
 
 
 ### Analysis 2.B - adding interaction by diagnosis 
-
-right_UF_MD_ExtBeh <- function(right_UF){
+right_UF_MD_ExtBeh_diag <- function(right_UF){
   library(car)
   library(olsrr)
   cat("Printing linear model \n")
@@ -190,6 +184,8 @@ right_UF_FA_IntBeh <- function(right_UF){
   ols_plot_cooksd_bar(LinModel)
 }
 
+
+#adding externalizing behaviour as a covariate
 right_UF_FA_IntBeh2 <- function(right_UF){
   library(car)
   library(olsrr)
@@ -207,9 +203,7 @@ right_UF_FA_IntBeh2 <- function(right_UF){
 }
 
 ### Analysis 3.B - adding interaction by diagnosis 
-
-
-right_UF_FA_IntBeh <- function(right_UF){
+right_UF_FA_IntBeh_diag <- function(right_UF){
   library(car)
   library(olsrr)
   cat("Printing linear model \n")
@@ -249,6 +243,8 @@ right_UF_MD_IntBeh <- function(right_UF){
   ols_plot_cooksd_bar(LinModel)
 }
 
+
+#adding externalizing behaviour as a covariate
 right_UF_MD_IntBeh2 <- function(right_UF){
   library(car)
   library(olsrr)
@@ -266,9 +262,7 @@ right_UF_MD_IntBeh2 <- function(right_UF){
 }
 
 ### Analysis 4.B - adding interaction by diagnosis 
-
-
-right_UF_MD_IntBeh <- function(right_UF){
+right_UF_MD_IntBeh_diag <- function(right_UF){
   library(car)
   library(olsrr)
   cat("Printing linear model \n")
@@ -284,9 +278,6 @@ right_UF_MD_IntBeh <- function(right_UF){
   plot(cooks.distance(LinModel))
   ols_plot_cooksd_bar(LinModel)
 }
-
-
-
 
 
 #######################################################################################
@@ -315,6 +306,8 @@ left_UF_FA_ExtBeh <- function(left_UF){
   ols_plot_cooksd_bar(LinModel)
 }
 
+
+#adding internalizing behaviour as a covariate
 left_UF_FA_ExtBeh2 <- function(left_UF){
   library(car)
   library(olsrr)
@@ -333,7 +326,7 @@ left_UF_FA_ExtBeh2 <- function(left_UF){
 
 
 ##Analysis 1.B - adding interaction with diagnosis 
-left_UF_FA_ExtBeh <- function(left_UF){
+left_UF_FA_ExtBeh_diag <- function(left_UF){
   library(car)
   library(olsrr)
   left_UF$clin_diagnosis[left_UF$clin_diagnosis == "GAD"] <- NA
@@ -409,6 +402,7 @@ left_UF_MD_ExtBeh <- function(left_UF){
 }
 
 
+#adding internalizing behaviour as a covariate
 left_UF_MD_ExtBeh2 <- function(left_UF){
   library(car)
   library(olsrr)
@@ -427,12 +421,12 @@ left_UF_MD_ExtBeh2 <- function(left_UF){
 
 
 ### Analysis 2.B - adding interaction by diagnosis 
-left_UF_MD_ExtBeh <- function(left_UF){
+left_UF_MD_ExtBeh_diag <- function(left_UF){
   library(car)
   library(olsrr)
   cat("Printing linear model \n")
   left_UF$clin_diagnosis[left_UF$clin_diagnosis == "GAD"] <- NA
-  LinModel <- lm(Mean_MD~CB68EPTOT + CB68EPTOT*clin_diagnosis + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
+  LinModel <- lm(Mean_MD~CB68EPTOT*clin_diagnosis + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
   print(summary(LinModel))
   cat("Printing beta coefficient values \n")
   #print(lm.beta(LinModel))
@@ -451,7 +445,7 @@ left_UF_MD_ExtBeh_age <- function(left_UF){
   library(olsrr)
   cat("Printing linear model \n")
   left_UF$clin_diagnosis[left_UF$clin_diagnosis == "GAD"] <- NA
-  LinModel <- lm(Mean_MD~CB68EPTOT + CB68EPTOT*age + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
+  LinModel <- lm(Mean_MD~CB68EPTOT*age + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
   print(summary(LinModel))
   cat("Printing beta coefficient values \n")
   #print(lm.beta(LinModel))
@@ -504,6 +498,8 @@ left_UF_FA_IntBeh <- function(left_UF){
   ols_plot_cooksd_bar(LinModel)
 }
 
+
+#adding externalizing behaviour as a covariate
 left_UF_FA_IntBeh2 <- function(left_UF){
   library(car)
   library(olsrr)
@@ -521,12 +517,12 @@ left_UF_FA_IntBeh2 <- function(left_UF){
 }
 
 ### Analysis 3.B - adding interaction by diagnosis 
-left_UF_FA_IntBeh <- function(left_UF){
+left_UF_FA_IntBeh_diag <- function(left_UF){
   library(car)
   library(olsrr)
   cat("Printing linear model \n")
   left_UF$clin_diagnosis[left_UF$clin_diagnosis == "GAD"] <- NA
-  LinModel <- lm(Mean_FA~CB68IPTOT + CB68IPTOT*clin_diagnosis + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
+  LinModel <- lm(Mean_FA~CB68IPTOT*clin_diagnosis + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
   print(summary(LinModel))
   cat("Printing beta coefficient values \n")
   #print(lm.beta(LinModel))
@@ -545,7 +541,7 @@ left_UF_FA_IntBeh <- function(left_UF){
   library(olsrr)
   cat("Printing linear model \n")
   left_UF$clin_diagnosis[left_UF$clin_diagnosis == "GAD"] <- NA
-  LinModel <- lm(Mean_FA~CB68IPTOT + CB68IPTOT*age + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
+  LinModel <- lm(Mean_FA~CB68IPTOT*age + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
   print(summary(LinModel))
   cat("Printing beta coefficient values \n")
   #print(lm.beta(LinModel))
@@ -599,6 +595,8 @@ left_UF_MD_IntBeh <- function(left_UF){
   ols_plot_cooksd_bar(LinModel)
 }
 
+
+#adding externalizing behaviour as a covariate
 left_UF_MD_IntBeh2 <- function(left_UF){
   library(car)
   library(olsrr)
@@ -621,7 +619,7 @@ left_UF_MD_IntBeh <- function(left_UF){
   library(olsrr)
   cat("Printing linear model \n")
   left_UF$clin_diagnosis[left_UF$clin_diagnosis == "GAD"] <- NA
-  LinModel <- lm(Mean_MD~CB68IPTOT + CB68IPTOT*clin_diagnosis + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
+  LinModel <- lm(Mean_MD~CB68IPTOT*clin_diagnosis + age + GENDER + Overall_DWI_Noise + ST_MED_6M, data = left_UF, na.action = na.omit)
   print(summary(LinModel))
   cat("Printing beta coefficient values \n")
   #print(lm.beta(LinModel))
