@@ -30,10 +30,8 @@ nclusters=500
 outputfolder=$targetdir
 
 mkdir -p $outputfolder
-#mkdir -p $outputfolder/vtks
 mkdir -p $outputfolder/registered_subjects
 
-#cp -l $inputfolder/*/*_TRACTS.vtk $outputfolder/vtks/
 
 wm_register_multisubject_faster.py \
   -j $threads \
