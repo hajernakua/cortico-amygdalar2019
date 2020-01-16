@@ -10,20 +10,17 @@ library(tidyverse)
 
 
 #Step 1: Setting up dataframe
-DF1 <- read.csv("/projects/hnakua/POND/TFCE_PALMFSL_ANALYSIS/pre-design-matrix.csv")
-DF2 <- read.csv("/projects/hnakua/POND/TFCE_PALMFSL_ANALYSIS/LandRvolumes.csv")
-MainData <- merge(DF1, DF2, by = "ID")
+MainData <- read.csv("/path/to/csv") ##csv of subjects 
 
-
-#adding clinical and intracranial volume components
-ClinicalData <- read.csv("/projects/hnakua/POND/Cortico-Amygdalar. Analysis/AmygdalaVol.Analysis/POND_ClinicalData.csv")
+#1.a: adding clinical data and brain data
+ClinicalData <- read.csv("path/to/csv")
 MainData <- merge(ClinicalData[, c('clin_diagnosis', 'ID')], MainData, by = "ID")
-AddingICV <- read.csv("/projects/hnakua/POND/CorticalMeasuresENIGMA_ThickAvg.csv")
+AddingICV <- read.csv("/path/to/csv")
 MainData <- merge(MainData, AddingICV[, c('ICV', 'ID')], by = "ID")
 
 
-##adding scanner to the DF so I can have it as a covariate
-Scanner <- read.csv("/home/hnakua/Downloads/2019-11-28_inventory-for-grace.csv")
+#1.b: adding scanner to the DF so I can have it as a covariate
+Scanner <- read.csv("/path/to/csv")
 names(Scanner)[names(Scanner) == "bids"] <- "ID"
 Scanner$ID <- gsub('/ses-01', '', Scanner$ID)
 Scanner$ID <- gsub('/ses-02', '', Scanner$ID)
@@ -36,7 +33,7 @@ Scanner <- Scanner[!duplicated(Scanner$ID), ]
 MainData <- merge(MainData, Scanner, by = "ID")
 
 
-##adding medication to the DF so I can have it as a covariate
+#1.c: adding medication to the DF so I can have it as a covariate
 MainData <- merge(MainData, POND_ClinicalData[, c('ST_MED_6M', 'ID')], by = "ID")
 
 
@@ -69,7 +66,7 @@ Reg.RAmgV.EB <- function(MainData){
   ols_plot_cooksd_bar(LinModel)
 }
 
-
+#adding internalizing behaviour as covariate 
 Reg.RAmgV.EB2 <- function(MainData){
   library(car)
   library(olsrr)
@@ -159,8 +156,8 @@ Reg.LAmgV.EB <- function(MainData){
   ols_plot_cooksd_bar(LinModel)
 }
 
-
-Reg.TAmgV.EB2 <- function(MainData){
+#adding internalizing behaviour as covariate 
+Reg.LAmgV.EB2 <- function(MainData){
   library(car)
   library(olsrr)
   cat("Printing linear model \n")
@@ -250,6 +247,7 @@ Reg.RAmgV.IB <- function(MainData){
   ols_plot_cooksd_bar(LinModel)
 }
 
+#adding externalizing behaviour as covariate 
 Reg.RAmgV.IB2 <- function(MainData){
   library(car)
   library(olsrr)
@@ -344,7 +342,7 @@ Reg.LAmgV.IB <- function(MainData){
   ols_plot_cooksd_bar(LinModel)
 }
 
-
+#adding externalizing behaviour as covariate 
 Reg.LAmgV.IB2 <- function(MainData){
   library(car)
   library(olsrr)
