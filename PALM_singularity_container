@@ -1,3 +1,7 @@
+###This is an example of the singularity command run on a bash terminal that was used for this paper. 
+###Due to specifications of the computing cluster, these commands were specified in a .txt file. 
+###This command was run for both the left and right hemispheres for each linear model 
+
 singularity run --cleanenv \
 -H /scratch/a/arisvoin/nakuah/sing_container \
 -B /scratch/a/arisvoin/nakuah/POND/Structural_Rerun_Stringent/CorticalThickness_EB_Age:/dir \
@@ -9,5 +13,5 @@ singularity run --cleanenv \
 -o /dir/results_R_cort \
 -T -tfce2D \
 -s /subfiles/sub-0880002/MNINonLinear/fsaverage_LR32k/sub-0880002.R.midthickness.32k_fs_LR.surf.gii /dir/L_area.func.gii \
--logp -n 2000 \
+-logp -n 2000 \ #2000 permutations 
 -precision "double"
