@@ -14,7 +14,7 @@ dtiprep_protocol=$2     # xml spec for DTIPrep
 outputfolder=$3         # output folder for all outputs
 threads=8
 
-
+#creating the functions
 TractographyLabelMapSeeding() {
     Slicer --launch TractographyLabelMapSeeding \
 	 "${output_name}_DTI.nrrd" \
@@ -43,7 +43,7 @@ DWIToDTIEstimation() {
 	DiffusionWeightedVolumeMasking
 }
 
-
+#running the functions on the condition that the file does not exist
 if [[ ! -e "${output_name}_DTI.nrrd" ]]; then
     echo "Running DWIToDTIEstimate on this subject!" &&
 	DWIToDTIEstimation;
