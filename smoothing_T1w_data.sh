@@ -7,17 +7,17 @@
 #module load connectome-workbench/1.3.2
 
 
-#Setting the file paths
+#Step 1: Setting the file paths
 output_dir=${1}         #directory where the outputs are specified to go
 SUBJECT_FILES=${2}      #subject files path
 
 
-#Converting FWHM to sigma
+#Step 2: Converting FWHM to sigma
 FWHM=12
 Sigma=`echo "${FWHM} / 2.355" | bc -l`
 
 
-
+#Step 3: running the function to smooth the structural data
 for sub in `ls -d ${SUBJECT_FILES}/sub-* | xargs -I '{}' basename {}`;
 
 do
