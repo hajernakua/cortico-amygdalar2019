@@ -5,6 +5,10 @@ module load python/2.7.8-anaconda-2.1.0
 module load python-extras/2.7.8
 module load whitematteranalysis/latest
 
+###############################################################################################
+################## This Script was created by Saba Shahab (2018)
+###############################################################################################
+
 if [ -z "$2" ]; then
 cat <<EOF
 
