@@ -72,3 +72,40 @@ done < ${sublist}
 #Step 6.b.2: Creating a func file from the shape file. 
 wb_command -metric-merge R_midthick_va.func.gii ${MERGELIST}
 wb_command -metric-reduce R_midthick_va.func.gii MEAN R_area.func.gii
+
+#Step 7: once the necessary files have been created, PALM can be run.
+#Due to specifications of the computing cluster, each PALM command was run in a separate singularity container which were all specified in a .txt file.
+#This command was run for both the left and right hemispheres for each linear model. 
+#These are two examples of singularity containers. 
+
+#this container runs PALM for the left amygdala-cortical vertices functional connectivity
+singularity run --cleanenv \
+-H /path/to/home/dir \
+-B ${dir}:/dir \
+-B ${SUBJECT_FILES}:/subfiles \
+/path/to/singularity_container \
+-i /dir/allsubs_merged_R.func.gii \
+-d /dir/DesignMatrix.csv \
+-t /dir/ContrastMatrix.csv \
+-o /dir/results_R_cort \
+-T -tfce2D \
+-s /subfiles/sub-1050007/MNINonLinear/fsaverage_LR32k/sub-1050007.R.midthickness.32k_fs_LR.surf.gii /dir/R_area.func.gii \
+-logp \
+-n 2000 \
+-precision "double"
+
+#this container runs PALM for the right amygdala-cortical vertices functional connectivity
+singularity run --cleanenv \
+-H /path/to/home/dir \
+-B ${dir}:/dir \
+-B ${SUBJECT_FILES}:/subfiles \
+/path/to/singularity_container \
+-i /dir/allsubs_merged_R_RA.func.gii \
+-d /dir/DesignMatrix.csv \
+-t /dir/ContrastMatrix.csv \
+-o /dir/results_L_RA_cort \
+-T -tfce2D \
+-s /subfiles/sub-1050007/MNINonLinear/fsaverage_LR32k/sub-1050007.L.midthickness.32k_fs_LR.surf.gii /dir/R_RA_area.func.gii \
+-logp \
+-n 2000 \
+-precision "double"
