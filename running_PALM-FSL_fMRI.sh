@@ -109,3 +109,16 @@ singularity run --cleanenv \
 -logp \
 -n 2000 \
 -precision "double"
+
+
+#Step 8: Once PALM is finished running, the left and right hemispherhic files need to merged into one file 
+
+#8.a: creating file for left hemisphere
+wb_command -cifti-create-dense-from-template /${dir}/allsubs_merged.dscalar.nii results_cort_tfce_tstat_fwep_c1.dscalar.nii -metric CORTEX_LEFT results_L_cort_tfce_tstat_fwep_c1.gii -metric CORTEX_RIGHT results_R_cort_tfce_tstat_fwep_c1.gii
+wb_command -cifti-create-dense-from-template /${dir}/allsubs_merged.dscalar.nii results_cort_tfce_tstat_fwep_c2.dscalar.nii -metric CORTEX_LEFT results_L_cort_tfce_tstat_fwep_c2.gii -metric CORTEX_RIGHT results_R_cort_tfce_tstat_fwep_c2.gii
+wb_command -cifti-math '(x-y)' ${fname}_tstat_fwep_c12.dscalar.nii -var x results_cort_tfce_tstat_fwep_c1.dscalar.nii -var y results_cort_tfce_tstat_fwep_c2.dscalar.nii
+
+#8.B: creating file for right hemisphere 
+wb_command -cifti-create-dense-from-template /${dir}/allsubs_merged.dscalar.nii results_RA_cort_tfce_tstat_fwep_c1.dscalar.nii -metric CORTEX_LEFT results_L_RA_cort_tfce_tstat_fwep_c1.gii -metric CORTEX_RIGHT results_R_RA_cort_tfce_tstat_fwep_c1.gii
+wb_command -cifti-create-dense-from-template /${dir}/allsubs_merged.dscalar.nii results_RA_cort_tfce_tstat_fwep_c2.dscalar.nii -metric CORTEX_LEFT results_L_RA_cort_tfce_tstat_fwep_c2.gii -metric CORTEX_RIGHT results_R_RA_cort_tfce_tstat_fwep_c2.gii
+wb_command -cifti-math '(x-y)' ${fname}_RA_tstat_fwep_c12.dscalar.nii -var x results_RA_cort_tfce_tstat_fwep_c1.dscalar.nii -var y results_RA_cort_tfce_tstat_fwep_c2.dscalar.nii
