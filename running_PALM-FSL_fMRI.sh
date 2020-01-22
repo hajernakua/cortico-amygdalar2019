@@ -83,7 +83,7 @@ singularity run --cleanenv \
 -H /path/to/home/dir \
 -B ${dir}:/dir \
 -B ${SUBJECT_FILES}:/subfiles \
-/path/to/singularity_container \
+/path/to/path_container \
 -i /dir/allsubs_merged_R.func.gii \
 -d /dir/DesignMatrix.csv \
 -t /dir/ContrastMatrix.csv \
@@ -99,7 +99,7 @@ singularity run --cleanenv \
 -H /path/to/home/dir \
 -B ${dir}:/dir \
 -B ${SUBJECT_FILES}:/subfiles \
-/path/to/singularity_container \
+/path/to/palm_container \
 -i /dir/allsubs_merged_R_RA.func.gii \
 -d /dir/DesignMatrix.csv \
 -t /dir/ContrastMatrix.csv \
