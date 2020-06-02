@@ -1,6 +1,6 @@
 This README.md file explains the step-by-step process of all the pre-processing and analyses in the correct order for the DWI data
 
-Step 1: pre-processing all raw DWI acquisitions using the fMRIprep pipeline (script: ___)
+Step 1: pre-processing all raw DWI acquisitions using DTIFIT and MRTrix (script: https://github.com/nat-tigr/homotopic/tree/master/bin)
 
 Step 2: perform quality control on all the DWI data using an a priori protocol (link: ____)
 
