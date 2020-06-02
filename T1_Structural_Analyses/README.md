@@ -2,7 +2,7 @@ This README.md file explains the step-by-step process of all the pre-processing 
 
 Step 1: pre-processing all raw T1-data using the fMRIprep pipeline (v1.1.1) using the freesurfer tag for anatomical reconstruction (script: fMRIprep_pre-processing.sh)
 
-Step 2: run the raw T1-weighted images through the MRIQC pipeline (script: ___)
+Step 2: run the raw T1-weighted images through the MRIQC pipeline (v0.11.0; script: MRIQC_pre-processing.sh)
 
 Step 3: Smooth the pre-processed data (script: smoothing_T1w_data.sh)
 
