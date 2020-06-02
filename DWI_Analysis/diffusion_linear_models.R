@@ -1,10 +1,6 @@
 ###This will perform the linear regression analysis for of the diffusion metrics for the cingulum and uncinate fasciculus
 
 
-#Step 0: sourcing necessary scripts
-source(gettingDFs.R)
-
-
 #Step 1: putting together the overall noise DF which uses an algorithm to calculate the overall noise of each participant 
 Overall_Noise <- read.csv("/path/to/csv")
 
