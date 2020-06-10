@@ -1,0 +1,182 @@
+---
+title: "T1w Image Quality Control Protocol"
+author: "Created by Hajer Nakua"
+date: "January 13, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r cars}
+
+```
+
+This manual will describe the standardized T1-weighted image quality control (QC) used in the TIGR Lab. This QC protocol was used for the publication of “name of paper”. The QC procedure used has two steps: a qualitative and quantitative QC procedure, as described below. Failing either visual or quantitative QC should result in exclusion.  
+
+QC decisions should be finalized by the researcher using the data for their respective papers, however, if more than one person is using the same dataset, it is recommended that they use the same QC ratings to improve within-lab replicability. In this case, 2 lab members should perform QC on the same dataset to evaluate inter-rater reliability. If this is not possible due to a very large sample size, then it is recommended that 2 people QC a subset of the same dataset to ensure that their ratings are similar.  
+
+##Step 1: Visual (qualitative) QC
+
+The fMRIprep output HTML files will be used for visual QC. Considering the sample size of many of the studies in the lab, using the fMRIprep output provides an efficient and accurate way to make QC decisions. This step requires a csv file to note artefacts, record comments and detail final QC decisions. Here is a link to the template as well as a visual example of the document:  
+
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/QC_CSV_ex.png)
+
+The fMRIprep pipeline outputs 3 major visual sections that are used for QC, which makes it possible to scroll through one HTML page per participant:  
+
+1. Brain Mask Images 
+2. MNI Space 
+3. Segmentation. 
+
+The overall rating system structure consists of a 5 point scale, where 1 indicates the least problematic artefact and a 5 indicates the most problematic artefact. The chart below details example criteria for each rating.  
+
+![](/home/hnakua/Pictures/artefact rating system structure.png)
+
+####Step 1.1: Brain Mask Images
+
+The brain mask image indicates whether the pipeline correctly differentiated between brain tissue and the skull. __The primary objective is to check whether the brain extraction was accurate.__ The mask should follow the outline the brain. It should not exclude any brain tissue nor should it include non-brain tissue such as dura mater or the skull. Normally, an incorrect brain mask is the result of a poor quality scan, however, if the quality of the scan is good and the brain mask is not accurate then the data for that participant should be re-processed. The brain mask section does not need to have a specific rating, but comments, if necessary, should be noted.  
+
+In this example, the difference between the pass and fail is very clear. There will be a few edge cases where the mask may miss a bit of brain tissue or capture non-brain regions. These cases should be noted and if the participant’s other scans seem fine (i.e., they don’t have artefacts), they should be re-processed and re-assessed.  
+
+####Step 1.2: T1 to MNI Registration
+
+The next set of brain images depict the overlay of the brain slices from each participant to MNI space (which is an average of 20+ healthy adults brain). This overlay can help provide a comparison between the quality of the brain scan for each participant and an averaged good quality brain. Poor quality images are often easily identifiable. __Common artefacts include ringing, ghosting or truncated brain regions__ (see below).  
+
+
+Deciphering good from bad quality scans often isn’t challenging, but most clinical datasets (especially pediatric samples) will have many edge cases, that is, brain images that aren’t of good quality but not too bad either. It is for this reason that the artefact rating system structure includes 5 ratings. There may be many cases where you are unsure which rating is appropriate. A general pattern is that if they have ringing artefacts across large regions of the brain (so for example, the entire cortex has visible rings) or if they have non-intensity uniformity, then they should be scored as a ‘moderate’ scan. Examples of edge cases are included below.  
+
+
+####Step 1.3: Segmentation
+
+This section is arguably the most important when it comes to making QC decisions. Poor segmentation of the pial and surface layer is often indicative of poor scans. __Segmentation is assessed based on whether the surface and pial layers properly differentiate the gray and white matter.__ If the brain scan is of poor quality and contains artefacts, then the segmentation will likely be incorrect, and this participant should be excluded. Importantly, if there are minor artefacts but the segmentation is good, then that participant could be included in the analysis (they would likely get a rating score of 3).   
+
+
+If the segmentation is not accurate but otherwise, the scan is good, it is recommended that you re-process that participant. If the segmentation is still not accurate, then it is recommended that you use ‘control point’ (a link on how to do this: ) provided by Freesurfer to fix this. Importantly, if there are minor-moderate artefacts (such as ringing), but the segmentation is otherwise accurate, then this participant should not be excluded and instead given a rating of 3 (moderate). Once all scans are rated, the participants should be grouped into pass, fail and doubtful based on the score they received.  
+
+
+Ultimately, visual QC decisions are subjective in nature and it’s challenging to achieve decent inter and intra-rater reliability. The effects of poor quality images are beginning to be well-documented in brain imaging research. To account for this, we recommend running all the analysis in the main cohort (which includes the pass and doubtful group) and an additional sensitivity analysis in the ‘pass’ group only. This group will only include good quality scans and remove the edge cases. Running all the analysis on the ‘pass’ group (called the stringent cohort), attempts to ensure that any potential issues in brain quality are accounted for. One caveat to this sensitivity analysis is that you will double all your analysis, and as such, need to correct for double the comparisons.  
+
+
+##Step 2: Quantitative QC
+
+
+Relying solely on a visual QC can introduce subjective biases, such as decision fatigue. It also increases the possibility of missing important issues in the scan. One way to increase objectivity in the QC procedure is to introduce quantitative image quality metrics that can be analyzed.   
+
+Using the MRIQC pipeline, there are 3 metrics that provide information of the quality of brain images:  
+1. __Contrast to noise ratio__: High CNR indicates good contrast between different brain tissues.  
+2. __Signal to noise ratio__: The signal in a voxel divided by the standard deviation of the signal across a region outside the brain. High SNR means a good signal with low noise.  
+3. __Coefficient of joint variation__: Higher values are linked to more head motion and intensity non-uniformity artefacts  
+
+These three metrics are provided by the MRIQC pipeline in a csv file. It is recommended that each metric is graphed in a distribution chart. Depending on the distribution of these values, it is recommended that subjects that exceed 2 standard deviations from the mean should be excluded. If this excludes a high percentage of the population (>10%), then exclude only those who exceed 2.5 or 3 standard deviations. Plotting the distribution will be helpful in this case.  
+
+
+##Step 3: Second rater or Automated QC
+
+The last step recommended for QC is to either have someone else QC the same dataset, and/or perform an automated QC to compare the initial results. The optimal solution is to have both a second rater and to perform the automated QC (we recommend the MRIQC’s random forest classifier, since 3 of the 14 image quality metrics are used in the previous step). The automated classifier provided by MRIQC uses the 14 image quality metrics and provides a binary prediction of whether each participant should be included or excluded (link:https://mriqc.readthedocs.io/en/stable/cv/base.html). These are not the results you should use for your analysis, but it provides a more objective check of the exclusion in your dataset. If many of the visual scores are incongruent with the automated scores, then re-checking the visual ratings of those participants is recommended. Whether there is a second rater or the automated classifier is used, an inter-rater reliability test should be performed.  
+
+
+##Example Images and Explanations
+
+
+Here are a few example images from the POND dataset; they include two examples for each good, doubtful and excluded participants. It is important to remember that raters may have differing opinions and that is inevitable; the goal is to identify the least noisy data to analyze.  
+
+####Good Quality Brain Images
+
+
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/QC protocol - good example.PNG)  
+  
+    
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/QC protocol - good example2.PNG)
+  
+  
+**These two examples are clear good quality images:**      
+
+* the brain mask cleanly separates the brain from the skull
+* there are no artefacts seen in the participant’s T1-MNI registration
+* the pial/surface segmentation clearly separates the gray and white matter.
+* There will be many easy cases like this. However, there may be cases where there are a few ‘rings’ in the T1-MNI 
+* Registration image; as long as the segmentation is acceptable, such participants should be included.
+  
+  
+####Moderate Quality Brain Images
+  
+Decisions based on these images can be controversial; some raters may want to include them in the analyses, and others may think they should be excluded. The trade-off that’s important to consider is that we don’t want to drastically reduce the variability in the data, nor do we want to introduce excess noise. By including these images in the “main” cohort but not “stringent” cohort, we hope to find the balance of this trade off.  
+
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/QC protocol - moderate example.PNG)
+
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/moderate zoom4.PNG)
+
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/moderate zoom6.PNG)
+
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/moderate zoom7.PNG)
+
+**A few things to note when looking through this example:**    
+
+* the brain mask is fine. 
+* there are noticeable artefacts (i.e., ringing - indicating head motion) in the T1-MNI Registration. 
+* These rings span large regions of the brain image which may be concerning
+* the brain is not deformed in anyway
+* there are a few segmentation errors, which the rater should attempt to fix, using ‘control points’ from freesurfer, but for the most part, the segmentation is okay 
+  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/QC protocol - moderate example2.PNG)  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/moderate zoom4.PNG)  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/moderate zoom1.PNG)  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/moderate zoom3.PNG)  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/moderate zoom2.PNG)  
+  
+    
+**This second example is worse quality than the first - some may prefer to exclude this image. A few things to note:**     
+  
+* there are small regions within the frontal lobe that are not captured by the brain mask, which indicates a re-processing may be necessary. 
+* There are noticeable rings in the T1-MNI registration that span important cortical regions. 
+* There are some noticeable regions of “intensity non-uniformity (INU)” which is when there is low contrast between the gray and white matter. 
+* In the segmentation image, there are some noticeable errors in the pial layer that missed some important cortical regions. 
+* This scan should be re-processed, and if the same errors occur, then this scan should be placed in the moderate group (rating of 3 on the visual rating system)
+
+
+####Bad Quality Brain Images
+
+
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/QC protocol - bad example.PNG)  
+
+  
+This example doesn’t often occur – a simple case of a bad quality scan due to severe head motion in the scanner. The brain mask fails to capture several brain regions, there are heavy rings and truncated brain regions in the T1-MNI registration, and the segmentation is very poor. These are the least controversial images to exclude.   
+  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/QC protocol - bad example2.PNG)  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/bad scan zoom3.PNG)  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/bad scan zoom1.PNG)  
+  
+![](/projects/hnakua/T1_QC_Protocol/Figs_Protocol/bad scan zoom2.PNG)  
+
+
+**This example is representative of a typical “poor quality scan”:**      
+  
+* The brain mask does a pretty good job at segmenting the brain
+* there are noticeable rings in the image, which is cause for concern. 
+* The T1-MNI images indicate the presence of heavy ringing throughout the entire brain. 
+* The segmentation section has some clear errors that on its own wouldn’t be grounds for exclusion, but the clear visible rings are concerning and may influence the results, which is grounds for exclusion.
+
+
+##Final Points
+
+Qualitative or quantitative QC will never be perfect and it's common to have disagreements of which scans should be included or excluded. One strategy is to practice QC on 30-50 participants from an independent sample and compare those ratings with the person who QCed that sample. This way, we can hope to get closer to a more standardized procedure.
+
+
+
+
+
+
+
+
+
