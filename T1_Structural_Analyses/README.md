@@ -6,7 +6,7 @@ Step 2: run the raw T1-weighted images through the MRIQC pipeline (v0.11.0; scri
 
 Step 3: Smooth the pre-processed data (script: smoothing_T1w_data.sh)
 
-Step 4: perform quality control using the QC Protocol (file: ____)
+Step 4: perform quality control using the QC Protocol (file: T1w_Protocol.html)
 
 Step 5: parcellate left and right amygdala volumes (script: DK_atlas_parcellations)
 
