@@ -22,8 +22,9 @@ right_UF <- merge(right_UF, Overall_Noise, by = "ID")
 ####NOTES:
 #1. Models here are shown for the right uncinate fasiculus, but were identically employed for the other white matter tracts
 #2. Only baseline models are shown here. If the baseline was significant, then the model was rerun removing outliers. If it was still significant, then it was re-run adding the other behavioural variable. If this model was significant, then it was re-run adding overall noise. If this model was significant, then it was re-run adding medication status.
-#3. If the best fitting age term was quadratic, then the model featured 'age' and 'age-squared' (age^2)
-#4. The same models and steps were run for the subsample analyses
+#3. Outliers were participants with a diffusion metric >2 standard deviations. All models were conducted without and with outlier removal.
+#4. If the best fitting age term was quadratic, then the model featured 'age' and 'age-squared' (age^2)
+#5. The same models and steps were run for the subsample analyses
 
 ######################################################################################################################################################
 ##########                                            RIGHT UNCINATE FASCICULUS
