@@ -16,4 +16,6 @@ Step 7: Register the created atlas to all subjects (script: slicer_apply_atlas_t
 
 Step 8: Extract diffusion metrics of interest for each participant (script: slicer_extracting_metrics.sh)
 
-Step 9: Conduct the linear regression analyses using R (script: diffusion_linear_models.R)
+Step 9: Determine the best fitting age model (script: Age_DiffusionMetrics.R)
+
+Step 10: Conduct the linear regression analyses using R (script: diffusion_linear_models.R)
