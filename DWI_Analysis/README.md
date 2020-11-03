@@ -10,7 +10,7 @@ Step 4: Using dMRIprep and the processed DWI data, run the Slicer Tractography s
 
 Step 5: Use the VTK from the SlicerTractography.sh script to build the clusters needed to put the white matter tracts together (script: slicer_atlas_creation.sh)
 
-Step 6: Create the dataset-specific atlas (link to PDF of instructions: ___)
+Step 6: Create the dataset-specific atlas using the Slicer dMRI software (https://github.com/SlicerDMRI)
 
 Step 7: Register the created atlas to all subjects (script: slicer_apply_atlas_to_subjects.sh)
 
