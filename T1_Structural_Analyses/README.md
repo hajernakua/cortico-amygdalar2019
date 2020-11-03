@@ -6,11 +6,9 @@ Step 2: run the raw T1-weighted images through the MRIQC pipeline (v0.11.0; scri
 
 Step 3: Smooth the pre-processed data (script: smoothing_T1w_data.sh)
 
-Step 4: perform quality control using the QC Protocol (file: T1w_Protocol.html)
+Step 4: perform quality control using the QC Protocol ([T1w_Protocol](https://htmlpreview.github.io/?https://github.com/hajernakua/cortico-amygdalar2019/blob/master/T1_Structural_Analyses/T1w_Protocol.html))
 
 Step 5: parcellate left and right amygdala volumes (script: DK_atlas_parcellations)
-
-Step 6: conduct behaviour by amygdala volume analysis (script: amygdala_volume_analysis.R)
 
 Step 7: run PALM for cortical thickness and cortico-amygdalar covariance analysis 
         7a. prepare design matrix (script: creating_design_matrix_structural.R)
