@@ -4,7 +4,7 @@ Step 1: concatenate the three DWI acquisitions (script: concatenate_DWI_aquisiti
 
 Step 2: process the DWI data; bind the bval and bvec files (script: Binding_bvals_and_bvecs.R), create synthetic fieldmap (script: making_fieldmaps.sh), and pre-process using DTIFIT and MRTrix (script: DWI_pre-processing.sh)
 
-Step 3: perform quality control on all the DWI data using an a priori protocol (link: ____)
+Step 3: perform quality control on all the DWI data using an a priori protocol (Quantitative QC Script: quantitative_DWI_QC.R; qualititative visual QC:___)
 
 Step 4: Using dMRIprep and the processed DWI data, run the Slicer Tractography script to provide the files required for building a white matter atlas (script: SlicerTractography.sh)
 
