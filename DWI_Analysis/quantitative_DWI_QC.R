@@ -34,28 +34,6 @@ density_plot_cnr1000 <- function(df) {
 }
 
 
-density_plot_cnr1600 <- function(df) {
-  df2 <- df %>% filter(avg_cnr_1600 < 9999)
-  plot <- ggplot(df2, aes(x = avg_cnr_1600)) +
-    geom_density(size = 2, aes(color = "#440154FF"), fill = "lightblue") +
-    geom_vline(data = df2, aes(xintercept = mean(avg_cnr_1600), color = "lightblue"), linetype = "dashed", size = 1) +
-    labs(title = "Distribution of B1600 CNR Values", x = "B1600 CNR Values", y = "Density") +
-    theme_bw()
-  return(plot)
-}
-
-
-density_plot_cnr2600 <- function(df) {
-  df2 <- df %>% filter(avg_cnr_2600 < 9999)
-  plot <- ggplot(df2, aes(x = avg_cnr_2600)) +
-    geom_density(size = 2, aes(color = "#440154FF"), fill = "lightblue") +
-    geom_vline(data = df2, aes(xintercept = mean(avg_cnr_2600), color = "lightblue"), linetype = "dashed", size = 1) +
-    labs(title = "Distribution of B2600 CNR Values", x = "B2600 CNR Values", y = "Density") +
-    theme_bw()
-  return(plot)
-}
-
-
 density_plot_snr <- function(df) {
   df2 <- df %>% filter(avg_snr_0 < 9999)
   plot <- ggplot(df2, aes(x = avg_snr_0)) +
